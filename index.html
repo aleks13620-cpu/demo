@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Рабочие инструменты: демо</title>
+<meta name="description" content="Демонстрационные копии действующих систем: сверка Ozon с 1С, контроль звонков логистов, поиск цен поставщиков. Данные обезличены.">
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f3f1ea; --border:rgba(20,20,18,.12);
+  --text:#1b1b19; --text-2:#55534e; --muted:#8a877f;
+  --accent:#1f5fa8; --accent-bg:#e6effa;
+  --ok:#2f6b33; --ok-bg:#e4f0e2; --warn:#8a5208; --warn-bg:#faeeda; --bad:#a03027; --bad-bg:#f7e3e1;
+  --tg-bg:#dfe9f2; --tg-msg:#ffffff;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151513; --surface:#1e1e1b; --surface-2:#262622; --border:rgba(255,255,255,.12);
+    --text:#ecebe6; --text-2:#b6b3aa; --muted:#8a877f;
+    --accent:#7fb0ea; --accent-bg:#1f2c3d;
+    --ok:#8fcf92; --ok-bg:#1f3321; --warn:#e8b56a; --warn-bg:#3a2c16; --bad:#f09a90; --bad-bg:#3d1f1c;
+    --tg-bg:#17212b; --tg-msg:#24303c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151513; --surface:#1e1e1b; --surface-2:#262622; --border:rgba(255,255,255,.12);
+  --text:#ecebe6; --text-2:#b6b3aa; --muted:#8a877f;
+  --accent:#7fb0ea; --accent-bg:#1f2c3d;
+  --ok:#8fcf92; --ok-bg:#1f3321; --warn:#e8b56a; --warn-bg:#3a2c16; --bad:#f09a90; --bad-bg:#3d1f1c;
+  --tg-bg:#17212b; --tg-msg:#24303c;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 16px 48px}
+h1{font-size:24px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:19px;font-weight:600;margin:0 0 4px}
+h3{font-size:15px;font-weight:600;margin:0 0 10px}
+p{margin:0 0 10px}
+.lead{color:var(--text-2);margin:0 0 14px;max-width:760px}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--warn-bg);color:var(--warn);border-radius:var(--radius);padding:10px 14px;font-size:13.5px;margin:0 0 22px}
+.note b{font-weight:600}
+
+/* Меню: радиокнопки, работает без JavaScript */
+.tabs>input{position:absolute;opacity:0;pointer-events:none}
+.menu{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:22px}
+.menu label{cursor:pointer;padding:10px 14px;border-radius:8px 8px 0 0;color:var(--text-2);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px}
+.menu label:hover{color:var(--text)}
+.panel{display:none}
+#t1:checked~.menu label[for=t1],#t2:checked~.menu label[for=t2],#t3:checked~.menu label[for=t3]{color:var(--accent);border-bottom-color:var(--accent)}
+#t1:checked~#p1,#t2:checked~#p2,#t3:checked~#p3{display:block}
+.tabs>input:focus-visible~.menu label{outline:none}
+#t1:focus-visible~.menu label[for=t1],#t2:focus-visible~.menu label[for=t2],#t3:focus-visible~.menu label[for=t3]{outline:2px solid var(--accent);outline-offset:2px}
+
+.intro{color:var(--text-2);margin:0 0 16px;max-width:780px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--text-2);margin:0 0 16px}
+.meta span::before{content:"● ";color:var(--ok)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 22px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.kpi .l{font-size:12.5px;color:var(--text-2)}
+.kpi .v{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--muted)}
+.kpi.bad .v{color:var(--bad)} .kpi.warn .v{color:var(--warn)}
+.block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 0 18px}
+.block .sub{font-size:13px;color:var(--text-2);margin:-6px 0 12px}
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+th{text-align:left;color:var(--text-2);font-weight:500;font-size:12.5px;padding:7px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:20px;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.bad{background:var(--bad-bg);color:var(--bad)} .pill.info{background:var(--accent-bg);color:var(--accent)}
+.card dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0 0 12px;font-size:13.5px}
+.card dt{color:var(--text-2)} .card dd{margin:0}
+.todo{background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:13.5px;margin:0 0 12px}
+.btn{display:inline-block;font:inherit;font-size:13.5px;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:8px;padding:6px 12px}
+.hint{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.tg{background:var(--tg-bg);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:10px}
+.tg .who{font-size:12.5px;font-weight:600;color:var(--accent);margin-bottom:2px}
+.msg{background:var(--tg-msg);border-radius:12px 12px 12px 4px;padding:9px 12px;font-size:13.5px;max-width:420px;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+.msg .t{font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+.msg ul{margin:4px 0 0;padding-left:18px}
+.timeline{list-style:none;margin:0;padding:0;border-left:2px solid var(--border)}
+.timeline li{position:relative;padding:0 0 14px 16px;font-size:13.5px}
+.timeline li::before{content:"";position:absolute;left:-6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.timeline li.end::before{background:var(--bad)}
+.timeline .d{font-size:12.5px;color:var(--text-2)}
+.flags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar .row{display:flex;justify-content:space-between;font-size:13.5px;gap:10px}
+.bar .track{height:8px;background:var(--surface-2);border-radius:4px;margin-top:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--bad);border-radius:4px}
+.bar .fill.w{background:var(--warn)}
+.how{font-size:13.5px;color:var(--text-2);border-top:1px solid var(--border);padding-top:14px;margin-top:6px}
+.how b{color:var(--text);font-weight:600}
+.frame{width:100%;height:78vh;min-height:520px;border:1px solid var(--border);border-radius:var(--radius);background:#fff}
+a{color:var(--accent)}
+footer{margin-top:30px;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Рабочие инструменты</h1>
+  <p class="lead">Три системы, которые сейчас работают у клиентов: сверка учёта интернет-магазина, контроль звонков логистов и поиск цен поставщиков для строительного проекта.</p>
+  <div class="note"><span aria-hidden="true">ⓘ</span><span><b>Это демонстрационная копия действующих систем.</b> Экраны и логика такие же, как в работе. Данные обезличены: названия магазинов, клиентов, сотрудников, номера и цифры заменены.</span></div>
+
+  <div class="tabs">
+    <input type="radio" name="tab" id="t1" checked>
+    <input type="radio" name="tab" id="t2">
+    <input type="radio" name="tab" id="t3">
+    <nav class="menu" aria-label="Инструменты">
+      <label for="t1">Сверка Ozon и 1С</label>
+      <label for="t2">Контроль звонков логистов</label>
+      <label for="t3">Где дешевле</label>
+    </nav>
+
+    <!-- ===================== 1. Сверка Ozon и 1С ===================== -->
+    <section class="panel" id="p1">
+      <h2>Сверка Ozon и 1С</h2>
+      <p class="intro">Сеть из 8 магазинов на Ozon. Ночью система забирает данные из Ozon и выгрузки 1С, к утру показывает, где учёт разошёлся с маркетплейсом: поставки, возвраты и вывозы, которые не проведены в 1С.</p>
+      <div class="meta"><span>Последний ночной забор Ozon: сегодня, 23:04</span><span>Утренняя сверка: сегодня, 05:12</span></div>
+
+      <div class="kpis">
+        <div class="kpi bad"><div class="l">Поставки не проведены в 1С</div><div class="v">14</div><div class="s">из них 5 старше 7 дней</div></div>
+        <div class="kpi warn"><div class="l">Ждут подтверждения 1С</div><div class="v">3</div><div class="s">менеджер отметил «провёл»</div></div>
+        <div class="kpi bad"><div class="l">Возвраты не оприходованы</div><div class="v">9</div><div class="s">за 30 дней</div></div>
+        <div class="kpi"><div class="l">В пути на склад Ozon</div><div class="v">21</div><div class="s">застрявшие исключены</div></div>
+      </div>
+
+      <div class="block">
+        <h3>Магазины</h3>
+        <div class="tw"><table>
+          <thead><tr><th>Магазин</th><th class="n">Поставки</th><th class="n">Возвраты</th><th class="n">Вывозы</th><th>Данные 1С</th><th>Сравнение</th></tr></thead>
+          <tbody>
+            <tr><td>Магазин 1</td><td class="n">4</td><td class="n">2</td><td class="n">0</td><td>сегодня</td><td><span class="pill ok">надёжно</span></td></tr>
+            <tr><td>Магазин 2</td><td class="n">0</td><td class="n">1</td><td class="n">0</td><td>сегодня</td><td><span class="pill ok">надёжно</span></td></tr>
+            <tr><td>Магазин 3</td><td class="n">5</td><td class="n">3</td><td class="n">1</td><td>сегодня</td><td><span class="pill ok">надёжно</span></td></tr>
+            <tr><td>Магазин 4</td><td class="n">1</td><td class="n">0</td><td class="n">0</td><td>вчера</td><td><span class="pill ok">надёжно</span></td></tr>
+            <tr><td>Магазин 5</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td>3 дня назад</td><td><span class="pill bad">нет свежей выгрузки</span></td></tr>
+            <tr><td>Магазин 6</td><td class="n">2</td><td class="n">1</td><td class="n">0</td><td>сегодня</td><td><span class="pill ok">надёжно</span></td></tr>
+            <tr><td>Магазин 7</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td>сегодня</td><td><span class="pill ok">надёжно</span></td></tr>
+            <tr><td>Магазин 8</td><td class="n">2</td><td class="n">2</td><td class="n">1</td><td>вчера</td><td><span class="pill warn">проверьте формат файла</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="grid2">
+        <div class="block">
+          <h3>Поставки, которых нет в 1С</h3>
+          <div class="tw"><table>
+            <thead><tr><th>Поставка</th><th>Магазин</th><th class="n">Шт.</th><th class="n">Дней</th><th>Статус</th></tr></thead>
+            <tbody>
+              <tr><td>2000 0187 4412</td><td>Магазин 3</td><td class="n">148</td><td class="n">19</td><td><span class="pill bad">не проведена</span></td></tr>
+              <tr><td>2000 0187 5530</td><td>Магазин 1</td><td class="n">62</td><td class="n">11</td><td><span class="pill bad">не проведена</span></td></tr>
+              <tr><td>2000 0188 0921</td><td>Магазин 6</td><td class="n">240</td><td class="n">8</td><td><span class="pill warn">в 1С не нашлось</span></td></tr>
+              <tr><td>2000 0188 1407</td><td>Магазин 3</td><td class="n">36</td><td class="n">4</td><td><span class="pill info">жду 1С</span></td></tr>
+              <tr><td>2000 0188 2265</td><td>Магазин 8</td><td class="n">90</td><td class="n">2</td><td><span class="pill bad">не проведена</span></td></tr>
+            </tbody>
+          </table></div>
+          <p class="hint">Показаны 5 из 14.</p>
+        </div>
+
+        <div class="block card">
+          <h3>Поставка 2000 0188 0921</h3>
+          <dl>
+            <dt>Магазин</dt><dd>Магазин 6</dd>
+            <dt>Состав</dt><dd>14 артикулов, 240 шт.</dd>
+            <dt>Ozon</dt><dd>принята на складе 24.09</dd>
+            <dt>1С</dt><dd>перемещения на склад Ozon нет</dd>
+            <dt>История</dt><dd>30.09 менеджер отметил «провёл», в утренней выгрузке 1С поставка не нашлась</dd>
+          </dl>
+          <div class="todo"><b>Что сделать:</b> провести в 1С перемещение на склад Ozon по этой поставке. Система сама проверит по следующей выгрузке.</div>
+          <span class="btn" role="img" aria-label="Кнопка в рабочей системе">✓ Я провёл, система проверит</span>
+          <p class="hint">Отметка менеджера не снимает поставку с контроля, пока её не подтвердит 1С.</p>
+        </div>
+      </div>
+
+      <div class="block">
+        <h3>Telegram: система сообщает о себе сама</h3>
+        <p class="sub">Каждое утро короткий отчёт. Если какой-то источник данных замолчал, сразу предупреждение, чтобы сбой не выглядел как «расхождений нет».</p>
+        <div class="tg">
+          <div class="msg"><div class="who">Сверка Ozon и 1С</div>✅ Доброе утро! Ночью отработал, свёрено 7 из 8 магазинов. Новых непроведённых поставок: 2.<div class="t">05:14</div></div>
+          <div class="msg"><div class="who">Сверка Ozon и 1С</div>Здравствуйте! Система заметила проблемы, которые требуют внимания:
+            <ul><li>Магазин 5: на почте нет отчёта 1С уже 3 дня</li><li>Магазин 8: файл 1С пришёл в другом формате, проверьте выгрузку</li></ul>
+            <div class="t">05:14</div></div>
+        </div>
+      </div>
+
+      <p class="how"><b>Как устроено.</b> Ozon по API, выгрузки 1С приходят на почту и забираются автоматически. Поставки, возвраты и вывозы сопоставляются по номерам. Порог приёмки: не больше 10% ложных срабатываний по разметке оператора.</p>
+    </section>
+
+    <!-- ===================== 2. Контроль звонков ===================== -->
+    <section class="panel" id="p2">
+      <h2>Контроль звонков логистов</h2>
+      <p class="intro">Логистическая компания, негабаритные перевозки. Система каждый день забирает записи звонков, расшифровывает их и с помощью языковой модели разбирает разговоры: кто звонил, что спросил логист, договорились ли о следующем шаге. Звонки одного клиента собираются в историю от первого обращения до сделки или отказа.</p>
+      <div class="meta"><span>Период: 22–28 сентября</span><span>Обработано сегодня, 06:40</span></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="l">Звонков за неделю</div><div class="v">412</div><div class="s">все расшифрованы</div></div>
+        <div class="kpi"><div class="l">Разговоров с клиентами</div><div class="v">137</div><div class="s">остальное: перевозчики, внутренние</div></div>
+        <div class="kpi"><div class="l">Новых обращений</div><div class="v">46</div><div class="s">первый звонок за 14 дней</div></div>
+        <div class="kpi bad"><div class="l">Не заведены в CRM</div><div class="v">18</div><div class="s">39% новых клиентов</div></div>
+      </div>
+
+      <div class="block">
+        <h3>Логисты</h3>
+        <div class="tw"><table>
+          <thead><tr><th>Логист</th><th class="n">Разговоров</th><th class="n">Новых клиентов</th><th class="n">Уточнил груз, маршрут, дату</th><th class="n">Назначил следующий шаг</th><th class="n">Отправил КП</th><th class="n">Без ответа &gt;2 дней</th></tr></thead>
+          <tbody>
+            <tr><td>Логист А.</td><td class="n">41</td><td class="n">14</td><td class="n">86%</td><td class="n">79%</td><td class="n">11</td><td class="n">0</td></tr>
+            <tr><td>Логист Б.</td><td class="n">38</td><td class="n">12</td><td class="n">74%</td><td class="n">58%</td><td class="n">7</td><td class="n"><span class="pill warn">3</span></td></tr>
+            <tr><td>Логист В.</td><td class="n">29</td><td class="n">11</td><td class="n">55%</td><td class="n">41%</td><td class="n">4</td><td class="n"><span class="pill bad">5</span></td></tr>
+            <tr><td>Руководитель отдела</td><td class="n">29</td><td class="n">9</td><td class="n">89%</td><td class="n">83%</td><td class="n">8</td><td class="n">1</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="grid2">
+        <div class="block">
+          <h3>История клиента: +7 9•• •••-••-41</h3>
+          <p class="sub">Запрос: экскаватор 22 т, Самара → Оренбург. В CRM клиента нет.</p>
+          <ol class="timeline">
+            <li><div class="d">15.09 · входящий · Логист В. · 3 мин</div>Клиент описал груз и маршрут. Логист назвал ориентир цены, дату погрузки не спросил.
+              <div class="flags"><span class="pill warn">дата не уточнена</span><span class="pill warn">следующий шаг не назначен</span></div></li>
+            <li><div class="d">18.09 · входящий · Логист В. · 1 мин</div>Клиент перезвонил сам, спросил про КП. Логист обещал отправить «сегодня».</li>
+            <li><div class="d">19.09 · исходящий · Логист В. · 2 мин</div>КП отправлено. Срок ответа не обговорён.</li>
+            <li class="end"><div class="d">03.10 · 14 дней тишины</div>Обращение закрыто без результата. Клиент не перезвонил, логист тоже.</li>
+          </ol>
+        </div>
+
+        <div class="block">
+          <h3>Узкие места недели</h3>
+          <div class="bars">
+            <div class="bar"><div class="row"><span>Новые клиенты не заведены в CRM</span><b>39%</b></div><div class="track"><div class="fill" style="width:39%"></div></div></div>
+            <div class="bar"><div class="row"><span>Первый разговор без следующего шага</span><b>31%</b></div><div class="track"><div class="fill" style="width:31%"></div></div></div>
+            <div class="bar"><div class="row"><span>Заявки без перезвона больше 2 дней</span><b>20%</b></div><div class="track"><div class="fill w" style="width:20%"></div></div></div>
+            <div class="bar"><div class="row"><span>Пропущенные входящие в 9–11 часов</span><b>14%</b></div><div class="track"><div class="fill w" style="width:14%"></div></div></div>
+          </div>
+          <p class="hint">Каждая строка открывается списком конкретных звонков.</p>
+        </div>
+      </div>
+
+      <p class="how"><b>Как устроено.</b> Записи берутся из телефонии, расшифровываются, перед разбором обезличиваются. Разбор делает языковая модель, выбранная по замеру на реальных звонках. Данные о клиентах сверяются с Битрикс24. Отчёт собственнику приходит в виде таблицы, форма согласована с ним.</p>
+    </section>
+
+    <!-- ===================== 3. Где дешевле ===================== -->
+    <section class="panel" id="p3">
+      <h2>Где дешевле</h2>
+      <p class="intro">Строительный проект. Система берёт позиции из сметы, сама находит их у поставщиков на официальных сайтах и в прайсах и показывает, где каждая позиция дешевле сегодня и какой разброс цен на рынке. Это снимок реального отчёта: цены из открытых источников.</p>
+      <iframe class="frame" src="https://aleks13620-cpu.github.io/budget-price-report/" title="Отчёт «Где дешевле»" loading="lazy"></iframe>
+      <p class="hint"><a href="https://aleks13620-cpu.github.io/budget-price-report/" target="_blank" rel="noopener">Открыть отчёт на отдельной странице ↗</a></p>
+    </section>
+  </div>
+
+  <footer>Демонстрационная страница. Все совпадения имён и номеров случайны.</footer>
+</div>
+</body>
+</html>
